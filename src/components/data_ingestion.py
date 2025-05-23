@@ -12,8 +12,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
-from data_transformation import DataTransformation
-from data_transformation import DataTransformationConfig
+from data_transformation import DataTransformation, DataTransformationConfig
+from model_trainer import ModelTrainer, ModelTrainerConfig
 
 @dataclass
 class DataIngestionConfig:
@@ -29,11 +29,11 @@ class DataIngestion:
     def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion method or component")
         try:
-            df = pd.read_csv(r"data\raw\customer_churn_dataset-training-master.csv")
+            _ = pd.read_csv(r"data\raw\customer_churn_dataset-training-master.csv")
             logging.info("Read the dataset as dataframe")
 
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
-
+            df = _.dropna()
             df.to_csv(self.ingestion_config.raw_data_path,index=False,header=True)
 
             logging.info("train test split initiated")
@@ -58,6 +58,12 @@ if __name__ == "__main__":
     train_data_path , test_data_path = obj.initiate_data_ingestion()
 
     data_transformer_obj = DataTransformation()
-    data_transformer_obj.initiate_data_transformation(train_data_path=train_data_path,test_data_path=test_data_path)
+    _ = data_transformer_obj.initiate_data_transformation(train_data_path=train_data_path,test_data_path=test_data_path)
+    train_arr , test_arr , preprocessor_path = _
+
+    model_trainer_obj = ModelTrainer()
+    r2_score = model_trainer_obj.initiate_model_training(train_arr=train_arr , test_arr=test_arr)
+    print(f"final score of the best model: {r2_score}")
+    
     
     
